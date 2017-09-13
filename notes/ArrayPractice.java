@@ -15,12 +15,32 @@ public class ArrayPractice {
         }
         return num1 > num4;
     }
+    public static void printNumbers(double ... nums) {
+        for (double n : nums) {
+            System.out.println(n);
+        }
+    }
+    public static void print2DArray(String[][] items) {
+        for (String[] i : items) {
+            for (String s : i) {
+                System.out.print(s + " ");
+            }
+            System.out.println();
+        }
+    }
     public static void main(String[] args) {
         int[] nums = new int[25];
         double[] scores;
         int numstudents = 143;
         scores = new double[numstudents];
         char[] letters = {'A', 'B', 'C', 'D', 'F'};
+        String[][] seats = new String[5][6];
+
+        for (int r = 0; r < seats.length; r++) {
+            for (int c = 0; c < seats[r].length; c++) {
+                seats[r][c] = "Spongebob";
+            }
+        }
 
         // System.out.println(nums);
         System.out.println(nums[0]);
@@ -42,5 +62,11 @@ public class ArrayPractice {
 
         int[] testnums = {4, 1, 2, 1};
         System.out.println(more14(testnums));
+
+        printNumbers(3, 4);
+        printNumbers(1, 2, 3, 7);
+        printNumbers();
+
+        print2DArray(seats);
     }
 }
