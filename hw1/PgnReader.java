@@ -51,7 +51,7 @@ public class PgnReader {
         // lowercase will represent black
 
         // populate pawns
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < board.length; i++) {
             board[1][i] = 'p';
             board[6][i] = 'P';
         }
