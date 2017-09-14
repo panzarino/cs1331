@@ -4,8 +4,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import java.util.Arrays;
-
 /**
  * Read a chess game formatted in PGN notation
  *
@@ -14,6 +12,20 @@ import java.util.Arrays;
  * @author Zach Panzarino <zachary@panzarino.com>
  */
 public class PgnReader {
+
+    // pieces that correspond to numbers
+    // positive = white, negative = black
+    // using ints makes it easier to do math
+    public static final int EMPTY = 0;
+    public static final int PAWN = 1;
+    public static final int ROOK = 2;
+    public static final int KNIGHT = 3;
+    public static final int BISHOP = 4;
+    public static final int QUEEN = 5;
+    public static final int KING = 6;
+
+    // variable to hold board
+    public static int[][] board;
 
     /**
      * Find the tagName tag pair in a PGN game and return its value.
@@ -32,7 +44,63 @@ public class PgnReader {
         }
         int startPos = game.indexOf('"', tagPos);
         int endPos = game.indexOf('"', startPos + 1);
-        return game.substring(startPos + 1, endPos).trim();
+        return game.substring(startPos + 1, endPos);
+    }
+
+    /**
+     * Print out the board for testing
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     */
+    private static void printBoard() {
+        for (int[] row : board) {
+            for (int col : row) {
+                System.out.print(col + ", ");
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * Populate the board with starting positions for pieces
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     */
+    public static void populate() {
+        // populate pawns
+        for (int i = 0; i < board.length; i++) {
+            board[1][i] = -PAWN;
+            board[6][i] = PAWN;
+        }
+
+        // add other pieces
+        // rooks
+        board[0][0] = board[0][7] = -ROOK;
+        board[7][0] = board[7][7] = ROOK;
+        // knights
+        board[0][1] = board[0][6] = -KNIGHT;
+        board[7][1] = board[7][6] = KNIGHT;
+        // bishops
+        board[0][2] = board[0][5] = -BISHOP;
+        board[7][2] = board[7][5] = BISHOP;
+        // queens
+        board[0][3] = -QUEEN;
+        board[7][3] = QUEEN;
+        // kings
+        board[0][4] = -KING;
+        board[7][4] = KING;
+    }
+
+    /**
+     * Parses a move and executes it
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param game String of game to parse
+     * @param pos position of game to parse from
+     * @return new position to check for
+     */
+    public static int parseMove(String game, int pos) {
+        return -1;
     }
 
     /**
@@ -46,44 +114,21 @@ public class PgnReader {
      * @return game final position in FEN
      */
     public static String finalPosition(String game) {
-        char[][] board = new char[8][8];
+        board = new int[8][8];
         // uppercase will represent white
         // lowercase will represent black
 
-        // populate pawns
-        for (int i = 0; i < board.length; i++) {
-            board[1][i] = 'p';
-            board[6][i] = 'P';
-        }
-
-        // add other pieces
-        // rooks
-        board[0][0] = board[0][7] = 'r';
-        board[7][0] = board[7][7] = 'R';
-        // knights
-        board[0][1] = board[0][6] = 'n';
-        board[7][1] = board[7][6] = 'N';
-        // bishops
-        board[0][2] = board[0][5] = 'b';
-        board[7][2] = board[7][5] = 'B';
-        // queens
-        board[0][3] = 'q';
-        board[7][3] = 'Q';
-        // kings
-        board[0][4] = 'k';
-        board[7][4] = 'K';
-
-        System.out.println(Arrays.deepToString(board));
+        populate();
 
         // begin tracking moves and updating board
         int move = 1;
-        int movePos;
+        int inputPos;
         // stores turn
         // true represents white
         // false represents black
         boolean active = true;
-        while ((movePos = game.indexOf(move + ".")) != -1) {
-
+        while ((inputPos = game.indexOf(move + ".")) != -1) {
+            int nextPos = parseMove(game, inputPos);
             move++;
         }
         return "";
