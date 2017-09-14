@@ -24,9 +24,6 @@ public class PgnReader {
     public static final int QUEEN = 5;
     public static final int KING = 6;
 
-    // variable to hold board
-    public static int[][] board;
-
     /**
      * Find the tagName tag pair in a PGN game and return its value.
      *
@@ -52,7 +49,7 @@ public class PgnReader {
      *
      * @author Zach Panzarino <zachary@panzarino.com>
      */
-    private static void printBoard() {
+    private static void printBoard(int[][] board) {
         for (int[] row : board) {
             for (int col : row) {
                 System.out.print(col + ", ");
@@ -65,8 +62,11 @@ public class PgnReader {
      * Populate the board with starting positions for pieces
      *
      * @author Zach Panzarino <zachary@panzarino.com>
+     * @return starting board
      */
-    public static void populate() {
+    public static int[][] populate() {
+        int[][] board = new int[8][8];
+
         // populate pawns
         for (int i = 0; i < board.length; i++) {
             board[1][i] = -PAWN;
@@ -75,32 +75,52 @@ public class PgnReader {
 
         // add other pieces
         // rooks
-        board[0][0] = board[0][7] = -ROOK;
-        board[7][0] = board[7][7] = ROOK;
+        board[0][0] = -ROOK;
+        board[0][7] = -ROOK;
+        board[7][0] = ROOK;
+        board[7][7] = ROOK;
         // knights
-        board[0][1] = board[0][6] = -KNIGHT;
-        board[7][1] = board[7][6] = KNIGHT;
+        board[0][1] = -KNIGHT;
+        board[0][6] = -KNIGHT;
+        board[7][1] = KNIGHT;
+        board[7][6] = KNIGHT;
         // bishops
-        board[0][2] = board[0][5] = -BISHOP;
-        board[7][2] = board[7][5] = BISHOP;
+        board[0][2] = -BISHOP;
+        board[0][5] = -BISHOP;
+        board[7][2] = BISHOP;
+        board[7][5] = BISHOP;
         // queens
         board[0][3] = -QUEEN;
         board[7][3] = QUEEN;
         // kings
         board[0][4] = -KING;
         board[7][4] = KING;
+
+        return board;
+    }
+
+    /**
+     * Splits apart moves from game String
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param game String of game input
+     * @return list of separated moves
+     */
+    public static String[] separateMoves(String game) {
+        return null;
     }
 
     /**
      * Parses a move and executes it
      *
      * @author Zach Panzarino <zachary@panzarino.com>
-     * @param game String of game to parse
-     * @param pos position of game to parse from
-     * @return new position to check for
+     * @param board game board to be used
+     * @param move string of the move
+     * @param turn true if white turn, false if black turn
+     * @return int array corresponding to certain move instructions
      */
-    public static int parseMove(String game, int pos) {
-        return -1;
+    public static int[] parseMove(int[][] board, String move, boolean turn) {
+        return null;
     }
 
     /**
@@ -114,23 +134,9 @@ public class PgnReader {
      * @return game final position in FEN
      */
     public static String finalPosition(String game) {
-        board = new int[8][8];
-        // uppercase will represent white
-        // lowercase will represent black
 
-        populate();
+        int[][] board = populate();
 
-        // begin tracking moves and updating board
-        int move = 1;
-        int inputPos;
-        // stores turn
-        // true represents white
-        // false represents black
-        boolean active = true;
-        while ((inputPos = game.indexOf(move + ".")) != -1) {
-            int nextPos = parseMove(game, inputPos);
-            move++;
-        }
         return "";
     }
 
