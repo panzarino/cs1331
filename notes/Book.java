@@ -3,9 +3,23 @@ public class Book {
     private String author;
     private int numPages;
 
-    public Book(String t, String a, int n) {
-        title = t;
-        author = a;
-        numPages = n;
+    public Book(String title, String author, int numPages) {
+        this.title = title;
+        this.author = author;
+        this.numPages = numPages;
+    }
+
+    public Book() {
+        title = "Unknown";
+        author = "Anonymous";
+        numPages = 0;
+    }
+
+    public String toString() {
+        return title + " written by " + author;
+    }
+
+    public boolean isLong() {
+        return numPages > 300;
     }
 }
