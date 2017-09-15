@@ -146,7 +146,7 @@ public class PgnReader {
         int movesStart = game.indexOf("\n1.");
         String movesString = game.substring(movesStart);
         // split into each set of moves
-        String[] movePairs = movesString.split("\\d+[\\\\.]\\s+");
+        String[] movePairs = movesString.split("\\d+[.]\\s*");
         // split into individual moves
         // movePairs contains a blank string as the first element
         // so we have to get rid of that
@@ -238,7 +238,7 @@ public class PgnReader {
             // breaks apart all of the move attributes
 
             // check if a piece is specified first
-            "([PRNQK])?"
+            "([RNBQK])?"
             // check if a pawn is specified
             // require that there is no number immediately afterwards
             // to distinguish between pawn and position
