@@ -54,7 +54,8 @@ public class PgnReader {
     private static void print2DArray(int[][] array) {
         for (int[] row : array) {
             for (int col : row) {
-                System.out.print(col + ", ");
+                String s = (col < 0) ? ", " : ",  ";
+                System.out.print(col + s);
             }
             System.out.println();
         }
@@ -89,7 +90,7 @@ public class PgnReader {
      * @param letter letter of row
      * @return number of row
      */
-    public static int rowFromLetter(String letter) {
+    public static int colFromLetter(String letter) {
         String letters = "abcdefgh";
         return letters.indexOf(letter);
     }
@@ -198,16 +199,36 @@ public class PgnReader {
         // determine what team the piece is from to check for
         int team = (turn) ? 1 : -1;
 
-        // first check if it is just one up/down
-        int pawnRow = endRow + team;
-        if (board[pawnRow][endCol] == team * PAWN) {
-            return new int[]{pawnRow, endCol};
+        // first cover cases when no piece is specified
+        if (stringPiece == null){
+            // go through the pawns first
+
+            // first check if it is just one up/down
+            int pawnRow = endRow + team;
+            // make sure the index is actually in bounds
+            if (pawnRow < board.length && pawnRow > 0) {
+                if (board[pawnRow][endCol] == team * PAWN) {
+                    return new int[]{pawnRow, endCol};
+                }
+            }
             // then check if it is two up/down from starting position
-        } else if (board[pawnRow + team][endCol] == team * PAWN) {
-            // set starting row for pawns
-            int startRow = (turn) ? 6 : 1;
-            if (pawnRow + team == startRow) {
-                return new int[]{startRow, endCol};
+            pawnRow += team;
+            if (pawnRow < board.length && pawnRow > 0) {
+                if (board[pawnRow][endCol] == team * PAWN) {
+                    // set starting row for pawns
+                    int startRow = (turn) ? 6 : 1;
+                    if (pawnRow == startRow) {
+                        return new int[]{startRow, endCol};
+                    }
+                }
+            }
+            // check if there was a pawn capture
+            if (stringPawn != null) {
+                int pawnCol = colFromLetter(stringPawn);
+                int pawnRow1 = endRow + team;
+                if (pawnRow1 < board.length && pawnRow1 > 0) {
+                    return new int[]{pawnRow1, pawnCol};
+                }
             }
         }
 
@@ -259,12 +280,13 @@ public class PgnReader {
         // assign variables to the different parts that were just extracted
         String stringPiece = regexMatcher.group(1);
         String stringPawn = regexMatcher.group(2);
-        String stringRow = regexMatcher.group(4);
-        String stringColumn = regexMatcher.group(5);
+        String stringCapture = regexMatcher.group(3);
+        String stringColumn = regexMatcher.group(4);
+        String stringRow = regexMatcher.group(5);
 
         // set the ending position in ints
-        int finalRow = rowFromLetter(stringRow);
-        int finalCol = Integer.parseInt(stringColumn);
+        int finalRow = board.length - Integer.parseInt(stringRow);
+        int finalCol = colFromLetter(stringColumn);
 
         // get the starting coordinates
         int[] startingPos = findStart(
@@ -283,9 +305,23 @@ public class PgnReader {
      * @author Zach Panzarino <zachary@panzarino.com>
      * @param board board for moves to be made on
      * @param moves moves to be made
+     * @return updated board
      */
     public static int[][] executeMove(int[][] board, int[] moves) {
-        return null;
+        // assumes that input is a valid move
+        int toRow = moves[0];
+        int toCol = moves[1];
+        int fromRow = moves[2];
+        int fromCol = moves[3];
+        // JUST FOR TESTING AS PARSE IS BUILT
+        if (fromRow == 0 && fromCol == 0) {
+            return board;
+        }
+        // move the piece
+        board[toRow][toCol] = board[fromRow][fromCol];
+        // remove the old location
+        board[fromRow][fromCol] = 0;
+        return board;
     }
 
     /**
