@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Read a chess game formatted in PGN notation
@@ -35,7 +37,7 @@ public class PgnReader {
      * @return value in the named tag pair
      */
     public static String tagValue(String tagName, String game) {
-        int tagPos = game.indexOf(tagName);
+        int tagPos = game.indexOf("[" + tagName);
         if (tagPos == -1) {
             return "NOT GIVEN";
         }
@@ -49,13 +51,47 @@ public class PgnReader {
      *
      * @author Zach Panzarino <zachary@panzarino.com>
      */
-    private static void printBoard(int[][] board) {
-        for (int[] row : board) {
+    private static void print2DArray(int[][] array) {
+        for (int[] row : array) {
             for (int col : row) {
                 System.out.print(col + ", ");
             }
             System.out.println();
         }
+    }
+
+    /**
+     * Print out a 1 dimensional array of Strings for testing
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     */
+    private static void print1DArray(String[] array) {
+        for (String i : array) {
+            System.out.println(i);
+        }
+    }
+
+    /**
+     * Print out a 1 dimensional array of ints for testing
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     */
+    private static void print1DArray(int[] array) {
+        for (int i : array) {
+            System.out.println(i);
+        }
+    }
+
+    /**
+     * Converts a row letter to the corresponding int
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param letter letter of row
+     * @return number of row
+     */
+    public static int rowFromLetter(String letter) {
+        String letters = "abcdefgh";
+        return letters.indexOf(letter);
     }
 
     /**
@@ -107,19 +143,148 @@ public class PgnReader {
      * @return list of separated moves
      */
     public static String[] separateMoves(String game) {
-        return null;
+        int movesStart = game.indexOf("\n1.");
+        String movesString = game.substring(movesStart);
+        // split into each set of moves
+        String[] movePairs = movesString.split("\\d+[\\\\.]\\s+");
+        // split into individual moves
+        // movePairs contains a blank string as the first element
+        // so we have to get rid of that
+        String[] moves = new String[movePairs.length * 2 - 2];
+        for (int i = 1; i < movePairs.length; i++) {
+            String[] split = movePairs[i].split("\\s");
+            moves[i * 2 - 2] = split[0];
+            // check to make sure it is actually a pair
+            if (split.length != 1) {
+                moves[i * 2 - 1] = split[1];
+            } else {
+                // if not a pair reduce the size of the array by one
+                // so that there is not a blank move at the end
+                String[] newMoves = new String[moves.length - 1];
+                for (int x = 0; x < moves.length - 1; x++) {
+                    newMoves[x] = moves[x];
+                }
+                // reassign moves to be returned
+                moves = newMoves;
+            }
+        }
+        return moves;
+    }
+
+    /**
+     * Finds the position of a peice that should move based on given ending
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board board to find move in
+     * @param endRow ending row position
+     * @param endCol ending column position
+     * @param stringPiece piece if one is specified
+     * @param stringPawn row of pawn as letter if one is specified
+     * @param turn true if white turn, false if black turn
+     * @return array of starting position as [startRow, startCol]
+     */
+    public static int[] findStart(
+        // had to break apart params because longer than 80 chars
+        int[][] board,
+        int endRow, int endCol,
+        String stringPiece, String stringPawn,
+        boolean turn
+    ) {
+        // lots of if statements with .length because
+        // we haven't learned try/catch yet which would be far easier
+
+        // working backwards from ending position to find starting position
+
+        // determine what team the piece is from to check for
+        int team = (turn) ? 1 : -1;
+
+        // first check if it is just one up/down
+        int pawnRow = endRow + team;
+        if (board[pawnRow][endCol] == team * PAWN) {
+            return new int[]{pawnRow, endCol};
+            // then check if it is two up/down from starting position
+        } else if (board[pawnRow + team][endCol] == team * PAWN) {
+            // set starting row for pawns
+            int startRow = (turn) ? 6 : 1;
+            if (pawnRow + team == startRow) {
+                return new int[]{startRow, endCol};
+            }
+        }
+
+        return new int[]{0, 0};
     }
 
     /**
      * Parses a move and executes it
      *
+     * Returned move instructions:
+     * [
+     * rowFrom
+     * colFrom
+     * rowTo
+     * colTo
+     * ]
+     *
      * @author Zach Panzarino <zachary@panzarino.com>
-     * @param board game board to be used
+     * @param board board for move to be found on
      * @param move string of the move
      * @param turn true if white turn, false if black turn
      * @return int array corresponding to certain move instructions
      */
     public static int[] parseMove(int[][] board, String move, boolean turn) {
+        // create the regex pattern that splits apart the move
+        Pattern regexPattern = Pattern.compile(
+            // fairly complicated regex string that
+            // breaks apart all of the move attributes
+
+            // check if a piece is specified first
+            "([PRNQK])?"
+            // check if a pawn is specified
+            // require that there is no number immediately afterwards
+            // to distinguish between pawn and position
+            + "([a-h](?!\\d))?"
+            // check if there is a capture
+            // not needed but gets it out of the way
+            + "(x)?"
+            // find the ending row
+            // must be followed by number to distinguish between pawns
+            + "([a-h](?=\\d))"
+            // find the ending column
+            + "(\\d)"
+        );
+        // use the regex to parse and break apart the string
+        Matcher regexMatcher = regexPattern.matcher(move);
+        regexMatcher.find();
+
+        // assign variables to the different parts that were just extracted
+        String stringPiece = regexMatcher.group(1);
+        String stringPawn = regexMatcher.group(2);
+        String stringRow = regexMatcher.group(4);
+        String stringColumn = regexMatcher.group(5);
+
+        // set the ending position in ints
+        int finalRow = rowFromLetter(stringRow);
+        int finalCol = Integer.parseInt(stringColumn);
+
+        // get the starting coordinates
+        int[] startingPos = findStart(
+            board, finalRow, finalCol, stringPiece, stringPawn, turn
+        );
+
+        // return the coordinates
+        return new int[]{finalRow, finalCol, startingPos[0], startingPos[1]};
+    }
+
+    /**
+     * Executes the move specified by int instructions
+     *
+     * Instructions are expected to come from parseMove method
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board board for moves to be made on
+     * @param moves moves to be made
+     */
+    public static int[][] executeMove(int[][] board, int[] moves) {
         return null;
     }
 
@@ -136,6 +301,38 @@ public class PgnReader {
     public static String finalPosition(String game) {
 
         int[][] board = populate();
+
+        String[] moves = separateMoves(game);
+
+        boolean turn = true;
+
+        // execute each of the moves
+        for (String move : moves) {
+            // first check for castles because they will not follow standard
+            // regex pattern for every other move
+            // and they require two moves, where all others require one
+            if (move.equals("O-O")) {
+                if (turn) {
+                    board = executeMove(board, new int[]{7, 4, 7, 6});
+                    board = executeMove(board, new int[]{7, 7, 7, 5});
+                } else {
+                    board = executeMove(board, new int[]{0, 4, 0, 6});
+                    board = executeMove(board, new int[]{0, 7, 0, 5});
+                }
+            } else if (move.equals("O-O-O")) {
+                if (turn) {
+                    board = executeMove(board, new int[]{7, 4, 7, 2});
+                    board = executeMove(board, new int[]{7, 0, 7, 3});
+                } else {
+                    board = executeMove(board, new int[]{0, 4, 0, 2});
+                    board = executeMove(board, new int[]{0, 0, 0, 3});
+                }
+            } else {
+                int[] directions = parseMove(board, move, turn);
+                board = executeMove(board, directions);
+            }
+            turn = !turn;
+        }
 
         return "";
     }
