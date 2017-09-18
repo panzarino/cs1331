@@ -274,7 +274,7 @@ public class PgnReader {
             // check up right
             for (int row = endRow, col = endCol;
                 row >= 0 && col < board[row].length;
-                row++, col++
+                row--, col++
             ) {
                 int val = board[row][col];
                 if (val == team * BISHOP || val == team * QUEEN) {
@@ -284,7 +284,7 @@ public class PgnReader {
             // check up left
             for (int row = endRow, col = endCol;
                 row >= 0 && col >= 0;
-                row++, col++
+                row--, col--
             ) {
                 int val = board[row][col];
                 if (val == team * BISHOP || val == team * QUEEN) {
