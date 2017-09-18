@@ -200,7 +200,8 @@ public class PgnReader {
         int team = (turn) ? 1 : -1;
 
         // first cover cases when no piece is specified
-        if (stringPiece == null){
+        if (stringPiece == null) {
+
             // go through the pawns first
 
             // first check if it is just one up/down
@@ -230,6 +231,69 @@ public class PgnReader {
                     return new int[]{pawnRow1, pawnCol};
                 }
             }
+
+            // go through the rooks (and queens)
+
+            // check for up/down moves
+            for (int i = 0; i < board.length; i++) {
+                int val = board[i][endCol];
+                if (val == team * ROOK || val == team * QUEEN) {
+                    return new int[]{i, endCol};
+                }
+            }
+            // check for left/right moves
+            for (int i = 0; i < board[endRow].length; i++) {
+                int val = board[i][endCol];
+                if (val == team * ROOK || val == team * QUEEN) {
+                    return new int[]{endRow, i};
+                }
+            }
+
+            // go through the bishops (and queens)
+
+            // check down right
+            for (int row = endRow, col = endCol;
+                row < board.length && col < board[row].length;
+                row++, col++
+            ) {
+                int val = board[row][col];
+                if (val == team * BISHOP || val == team * QUEEN) {
+                    return new int[]{row, col};
+                }
+            }
+            // check down left
+            for (int row = endRow, col = endCol;
+                row < board.length && col >= 0;
+                row++, col--
+            ) {
+                int val = board[row][col];
+                if (val == team * BISHOP || val == team * QUEEN) {
+                    return new int[]{row, col};
+                }
+            }
+            // check up right
+            for (int row = endRow, col = endCol;
+                row >= 0 && col < board[row].length;
+                row++, col++
+            ) {
+                int val = board[row][col];
+                if (val == team * BISHOP || val == team * QUEEN) {
+                    return new int[]{row, col};
+                }
+            }
+            // check up left
+            for (int row = endRow, col = endCol;
+                row >= 0 && col >= 0;
+                row++, col++
+            ) {
+                int val = board[row][col];
+                if (val == team * BISHOP || val == team * QUEEN) {
+                    return new int[]{row, col};
+                }
+            }
+
+            // go through the knights
+
         }
 
         return new int[]{0, 0};
