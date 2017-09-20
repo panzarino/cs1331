@@ -239,18 +239,55 @@ public class PgnReader {
         // go through the rooks (and queens)
         if (stringPiece.equals("R") || stringPiece.equals("Q")) {
 
-            // check for up/down moves
-            for (int i = 0; i < board.length; i++) {
+            // make sure we are looking for the right piece
+            int piece = (stringPiece.equals("R")) ? ROOK : QUEEN;
+
+            // check for up moves
+            for (int i = endRow; i >= 0; i--) {
                 int val = board[i][endCol];
-                if (val == team * ROOK || val == team * QUEEN) {
-                    return new int[]{i, endCol};
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{i, endCol};
+                    } else {
+                        // break out of loop because piece is in the way
+                        i = -1;
+                    }
                 }
             }
-            // check for left/right moves
-            for (int i = 0; i < board[endRow].length; i++) {
+            // check for down moves
+            for (int i = endRow; i < board.length; i++) {
                 int val = board[i][endCol];
-                if (val == team * ROOK || val == team * QUEEN) {
-                    return new int[]{endRow, i};
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{i, endCol};
+                    } else {
+                        // break out of loop because piece is in the way
+                        i = board.length;
+                    }
+                }
+            }
+            // check for left moves
+            for (int i = endCol; i >= 0; i--) {
+                int val = board[i][endCol];
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{endRow, i};
+                    } else {
+                        // break out of loop because piece is in the way
+                        i = -1;
+                    }
+                }
+            }
+            // check for right moves
+            for (int i = endCol; i < board[endRow].length; i++) {
+                int val = board[i][endCol];
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{endRow, i};
+                    } else {
+                        // break out of loop because piece is in the way
+                        i = board.length;
+                    }
                 }
             }
         }
@@ -258,14 +295,22 @@ public class PgnReader {
         // go through the bishops (and queens)
         if (stringPiece.equals("B") || stringPiece.equals("Q")) {
 
+            // make sure we are looking for the right piece
+            int piece = (stringPiece.equals("B")) ? BISHOP : QUEEN;
+
             // check down right
             for (int row = endRow, col = endCol;
                 row < board.length && col < board[row].length;
                 row++, col++
             ) {
                 int val = board[row][col];
-                if (val == team * BISHOP || val == team * QUEEN) {
-                    return new int[]{row, col};
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{row, col};
+                    } else {
+                        // break out of loop because piece is in the way
+                        row = board.length;
+                    }
                 }
             }
             // check down left
@@ -274,8 +319,13 @@ public class PgnReader {
                 row++, col--
             ) {
                 int val = board[row][col];
-                if (val == team * BISHOP || val == team * QUEEN) {
-                    return new int[]{row, col};
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{row, col};
+                    } else {
+                        // break out of loop because piece is in the way
+                        row = board.length;
+                    }
                 }
             }
             // check up right
@@ -284,8 +334,13 @@ public class PgnReader {
                 row--, col++
             ) {
                 int val = board[row][col];
-                if (val == team * BISHOP || val == team * QUEEN) {
-                    return new int[]{row, col};
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{row, col};
+                    } else {
+                        // break out of loop because piece is in the way
+                        row = -1;
+                    }
                 }
             }
             // check up left
@@ -294,20 +349,21 @@ public class PgnReader {
                 row--, col--
             ) {
                 int val = board[row][col];
-                if (val == team * BISHOP || val == team * QUEEN) {
-                    return new int[]{row, col};
+                if (val != 0) {
+                    if (val == team * piece) {
+                        return new int[]{row, col};
+                    } else {
+                        // break out of loop because piece is in the way
+                        row = -1;
+                    }
                 }
             }
         }
 
+        // go through the knights
         if (stringPiece.equals("N")) {
 
-            // go through the knights
-            // have to keep checking if the indexes are in bounds
-            // because we can't use try/except
-
-            // create a bunch of unnessessary variables
-            // because its easier to check the indexes
+            // create a variables for possible locations
             int twoUp = endRow - 2;
             int twoDown = endRow + 2;
             int oneUp = endRow - 1;
@@ -317,7 +373,10 @@ public class PgnReader {
             int oneRight = endCol + 1;
             int oneLeft = endCol - 1;
 
-            // don't use else if becuase it will not properly check all
+            // go through all possible positions for knights
+            // have to keep checking if the indexes are in bounds
+            // because we can't use try/except
+            // don't use else if because it will not properly check all of them
             if (twoUp >= 0 && oneRight < board[twoUp].length) {
                 if (board[twoUp][oneRight] == team * KNIGHT) {
                     return new int[]{twoUp, oneRight};
@@ -361,13 +420,17 @@ public class PgnReader {
         }
 
         if (stringPiece.equals("K")) {
+
+            // set variables for king position
             int up = endRow - 1;
             int down = endRow + 1;
             int left = endCol - 1;
             int right = endCol + 1;
 
+            // check all possible king locations
             // lots of if statements to make sure
             // we don't get an index out of bounds error
+            // don't use else if because it will not properly check all of them
             if (up >= 0) {
                 if (board[up][endCol] == team * KING) {
                     return new int[]{up, endCol};
@@ -500,23 +563,6 @@ public class PgnReader {
     }
 
     /**
-     * Reverses the sign of ints in a board
-     *
-     * @author Zach Panzarino <zachary@panzarino.com>
-     * @param board original board of game
-     * @return reversed board
-     */
-    public static int[][] reverseBoard(int[][] board) {
-        int[][] output = new int[board.length][board[0].length];
-        for (int r = 0; r < board.length; r++) {
-            for (int c = 0; c < board[r].length; c++) {
-                output[r][c] = -board[r][c];
-            }
-        }
-        return output;
-    }
-
-    /**
      * Converts a piece number into the respective character
      *
      * @author Zach Panzarino <zachary@panzarino.com>
@@ -526,7 +572,7 @@ public class PgnReader {
     public static char convertPiece(int number) {
         char[] upper = new char[]{' ', 'P', 'R', 'N', 'B', 'Q', 'K'};
         char[] lower = new char[]{' ', 'p', 'r', 'n', 'b', 'q', 'k'};
-        return (number > 0) ? lower[number] : upper[-number];
+        return (number > 0) ? upper[number] : lower[-number];
     }
 
     /**
@@ -534,24 +580,20 @@ public class PgnReader {
      *
      * @author Zach Panzarino <zachary@panzarino.com>
      * @param board board of the game
-     * @param turn true for white turn, false for black turn
      * @return FEN representation of given board
      */
-    public static String convertFEN(int[][] board, boolean turn) {
+    public static String convertFEN(int[][] board) {
         // output to be added on to
         String output = "";
         // temp var to keep track of empty spaces
         int empty = 0;
-        // reverse the board if its black turn
-        board = (turn) ? board : reverseBoard(board);
         // loop through the board
         for (int[] row : board) {
             for (int col : row) {
                 // check if there is a value for empty
                 if (col == 0) {
                     empty++;
-                }
-                else {
+                } else {
                     if (empty > 0) {
                         output += empty;
                         empty = 0;
@@ -565,6 +607,9 @@ public class PgnReader {
             }
             output += '/';
         }
+        // remove last slash
+        output = output.substring(0, output.length() - 1);
+
         return output;
     }
 
@@ -608,13 +653,15 @@ public class PgnReader {
                     board = executeMove(board, new int[]{0, 0, 0, 3});
                 }
             } else {
+                // get move and execute it
                 int[] directions = parseMove(board, move, turn);
                 board = executeMove(board, directions);
             }
+            // flip turn
             turn = !turn;
         }
 
-        return convertFEN(board, turn);
+        return convertFEN(board);
     }
 
     /**
