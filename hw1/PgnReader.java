@@ -199,10 +199,13 @@ public class PgnReader {
         // determine what team the piece is from to check for
         int team = (turn) ? 1 : -1;
 
-        // first cover cases when no piece is specified
-        if (stringPiece == null) {
+        // using if because if condition is satisfied it will return
+        // so it is not more efficient to use if else
+        // also if else will not allow queen to check for both
+        // rook and bishop properties
 
-            // go through the pawns first
+        // go through pawns first
+        if (stringPiece == null) {
 
             // first check if it is just one up/down
             int pawnRow = endRow + team;
@@ -231,8 +234,10 @@ public class PgnReader {
                     return new int[]{pawnRow1, pawnCol};
                 }
             }
+        }
 
-            // go through the rooks (and queens)
+        // go through the rooks (and queens)
+        if (stringPiece.equals("R") || stringPiece.equals("Q")) {
 
             // check for up/down moves
             for (int i = 0; i < board.length; i++) {
@@ -248,8 +253,10 @@ public class PgnReader {
                     return new int[]{endRow, i};
                 }
             }
+        }
 
-            // go through the bishops (and queens)
+        // go through the bishops (and queens)
+        if (stringPiece.equals("B") || stringPiece.equals("Q")) {
 
             // check down right
             for (int row = endRow, col = endCol;
@@ -291,11 +298,119 @@ public class PgnReader {
                     return new int[]{row, col};
                 }
             }
-
-            // go through the knights
-
         }
 
+        if (stringPiece.equals("N")) {
+
+            // go through the knights
+            // have to keep checking if the indexes are in bounds
+            // because we can't use try/except
+
+            // create a bunch of unnessessary variables
+            // because its easier to check the indexes
+            int twoUp = endRow - 2;
+            int twoDown = endRow + 2;
+            int oneUp = endRow - 1;
+            int oneDown = endRow - 1;
+            int twoRight = endCol + 2;
+            int twoLeft = endCol - 2;
+            int oneRight = endCol + 1;
+            int oneLeft = endCol - 1;
+
+            // don't use else if becuase it will not properly check all
+            if (twoUp >= 0 && oneRight < board[twoUp].length) {
+                if (board[twoUp][oneRight] == team * KNIGHT) {
+                    return new int[]{twoUp, oneRight};
+                }
+            }
+            if (twoUp >= 0 && oneLeft >= 0) {
+                if (board[twoUp][oneLeft] == team * KNIGHT) {
+                    return new int[]{twoUp, oneLeft};
+                }
+            }
+            if (twoDown >= 0 && oneRight < board[twoDown].length) {
+                if (board[twoDown][oneRight] == team * KNIGHT) {
+                    return new int[]{twoDown, oneRight};
+                }
+            }
+            if (twoDown >= 0 && oneLeft >= 0) {
+                if (board[twoDown][oneLeft] == team * KNIGHT) {
+                    return new int[]{twoDown, oneLeft};
+                }
+            }
+            if (oneUp >= 0 && twoRight < board[oneUp].length) {
+                if (board[oneUp][twoRight] == team * KNIGHT) {
+                    return new int[]{oneUp, twoRight};
+                }
+            }
+            if (oneUp >= 0 && twoLeft >= 0) {
+                if (board[oneUp][twoLeft] == team * KNIGHT) {
+                    return new int[]{oneUp, twoLeft};
+                }
+            }
+            if (oneDown >= 0 && twoRight < board[oneDown].length) {
+                if (board[oneDown][twoRight] == team * KNIGHT) {
+                    return new int[]{oneDown, twoRight};
+                }
+            }
+            if (oneDown >= 0 && twoLeft >= 0) {
+                if (board[oneDown][twoLeft] == team * KNIGHT) {
+                    return new int[]{oneDown, twoLeft};
+                }
+            }
+        }
+
+        if (stringPiece.equals("K")) {
+            int up = endRow - 1;
+            int down = endRow + 1;
+            int left = endCol - 1;
+            int right = endCol + 1;
+
+            // lots of if statements to make sure
+            // we don't get an index out of bounds error
+            if (up >= 0) {
+                if (board[up][endCol] == team * KING) {
+                    return new int[]{up, endCol};
+                }
+                if (left >= 0) {
+                    if (board[up][left] == team * KING) {
+                        return new int[]{up, left};
+                    }
+                }
+                if (right < board[up].length) {
+                    if (board[up][right] == team * KING) {
+                        return new int[]{up, right};
+                    }
+                }
+            }
+            if (down < board.length) {
+                if (board[down][endCol] == team * KING) {
+                    return new int[]{down, endCol};
+                }
+                if (left >= 0) {
+                    if (board[down][left] == team * KING) {
+                        return new int[]{down, left};
+                    }
+                }
+                if (right < board[down].length) {
+                    if (board[down][right] == team * KING) {
+                        return new int[]{down, right};
+                    }
+                }
+            }
+            if (left >= 0) {
+                if (board[endRow][left] == team * KING) {
+                    return new int[]{endRow, left};
+                }
+            }
+            if (right >= 0) {
+                if (board[endRow][right] == team * KING) {
+                    return new int[]{endRow, right};
+                }
+            }
+        }
+
+        // default return so the compiler doesn't throw an error
         return new int[]{0, 0};
     }
 
@@ -377,15 +492,80 @@ public class PgnReader {
         int toCol = moves[1];
         int fromRow = moves[2];
         int fromCol = moves[3];
-        // JUST FOR TESTING AS PARSE IS BUILT
-        if (fromRow == 0 && fromCol == 0) {
-            return board;
-        }
         // move the piece
         board[toRow][toCol] = board[fromRow][fromCol];
         // remove the old location
         board[fromRow][fromCol] = 0;
         return board;
+    }
+
+    /**
+     * Reverses the sign of ints in a board
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board original board of game
+     * @return reversed board
+     */
+    public static int[][] reverseBoard(int[][] board) {
+        int[][] output = new int[board.length][board[0].length];
+        for (int r = 0; r < board.length; r++) {
+            for (int c = 0; c < board[r].length; c++) {
+                output[r][c] = -board[r][c];
+            }
+        }
+        return output;
+    }
+
+    /**
+     * Converts a piece number into the respective character
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param number number of piece
+     * @return character of piece
+     */
+    public static char convertPiece(int number) {
+        char[] upper = new char[]{' ', 'P', 'R', 'N', 'B', 'Q', 'K'};
+        char[] lower = new char[]{' ', 'p', 'r', 'n', 'b', 'q', 'k'};
+        return (number > 0) ? lower[number] : upper[-number];
+    }
+
+    /**
+     * Converts a board to FEN Notation
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board board of the game
+     * @param turn true for white turn, false for black turn
+     * @return FEN representation of given board
+     */
+    public static String convertFEN(int[][] board, boolean turn) {
+        // output to be added on to
+        String output = "";
+        // temp var to keep track of empty spaces
+        int empty = 0;
+        // reverse the board if its black turn
+        board = (turn) ? board : reverseBoard(board);
+        // loop through the board
+        for (int[] row : board) {
+            for (int col : row) {
+                // check if there is a value for empty
+                if (col == 0) {
+                    empty++;
+                }
+                else {
+                    if (empty > 0) {
+                        output += empty;
+                        empty = 0;
+                    }
+                    output += convertPiece(col);
+                }
+            }
+            if (empty > 0) {
+                output += empty;
+                empty = 0;
+            }
+            output += '/';
+        }
+        return output;
     }
 
     /**
@@ -434,7 +614,7 @@ public class PgnReader {
             turn = !turn;
         }
 
-        return "";
+        return convertFEN(board, turn);
     }
 
     /**
