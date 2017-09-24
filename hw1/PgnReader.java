@@ -173,6 +173,356 @@ public class PgnReader {
     }
 
     /**
+     * Finds the starting position for a pawn
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board game board
+     * @param endRow ending row position
+     * @param endCol ending column position
+     * @param stringPawn row of pawn as string if capture
+     * @param team 1 if white, -1 if black
+     * @return array of starting position as [startRow, startCol]
+     */
+    public static int[] pawnStart(
+        int[][] board, int endRow, int endCol, String stringPawn, int team
+    ) {
+        // first check if it is just one up/down
+        int pawnRow = endRow + team;
+        // make sure the index is actually in bounds
+        if (pawnRow < board.length && pawnRow > 0) {
+            if (board[pawnRow][endCol] == team * PAWN) {
+                return new int[]{pawnRow, endCol};
+            }
+        }
+        // then check if it is two up/down from starting position
+        pawnRow += team;
+        if (pawnRow < board.length && pawnRow > 0) {
+            if (board[pawnRow][endCol] == team * PAWN) {
+                // set starting row for pawns
+                int startRow = (team == 1) ? 6 : 1;
+                if (pawnRow == startRow) {
+                    return new int[]{startRow, endCol};
+                }
+            }
+        }
+        // check if there was a pawn capture
+        if (stringPawn != null) {
+            int pawnCol = colFromLetter(stringPawn);
+            int pawnRow1 = endRow + team;
+            if (pawnRow1 < board.length && pawnRow1 > 0) {
+                return new int[]{pawnRow1, pawnCol};
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds the starting position for a rook
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board game board
+     * @param endRow ending row position
+     * @param endCol ending column position
+     * @param whichPiece true if bishop, false if queen
+     * @param team 1 if white, -1 if black
+     * @return array of starting position as [startRow, startCol]
+     */
+    public static int[] rookStart(
+        int[][] board, int endRow, int endCol, boolean whichPiece, int team
+    ) {
+        // make sure we are looking for the right piece
+        int piece = (whichPiece) ? ROOK : QUEEN;
+
+        // check for up moves
+        for (int i = endRow; i >= 0; i--) {
+            int val = board[i][endCol];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{i, endCol};
+                } else {
+                    // break out of loop because piece is in the way
+                    i = -1;
+                }
+            }
+        }
+        // check for down moves
+        for (int i = endRow; i < board.length; i++) {
+            int val = board[i][endCol];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{i, endCol};
+                } else {
+                    // break out of loop because piece is in the way
+                    i = board.length;
+                }
+            }
+        }
+        // check for left moves
+        for (int i = endCol; i >= 0; i--) {
+            int val = board[i][endCol];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{endRow, i};
+                } else {
+                    // break out of loop because piece is in the way
+                    i = -1;
+                }
+            }
+        }
+        // check for right moves
+        for (int i = endCol; i < board[endRow].length; i++) {
+            int val = board[i][endCol];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{endRow, i};
+                } else {
+                    // break out of loop because piece is in the way
+                    i = board.length;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds the starting position for a bishop
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board game board
+     * @param endRow ending row position
+     * @param endCol ending column position
+     * @param whichPiece true if bishop, false if queen
+     * @param team 1 if white, -1 if black
+     * @return array of starting position as [startRow, startCol]
+     */
+    public static int[] bishopStart(
+        int[][] board, int endRow, int endCol, boolean whichPiece, int team
+    ) {
+        // make sure we are looking for the right piece
+        int piece = (whichPiece) ? BISHOP : QUEEN;
+
+        // check down right
+        for (int row = endRow, col = endCol;
+            row < board.length && col < board[row].length;
+            row++, col++
+        ) {
+            int val = board[row][col];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{row, col};
+                } else {
+                    // break out of loop because piece is in the way
+                    row = board.length;
+                }
+            }
+        }
+        // check down left
+        for (int row = endRow, col = endCol;
+            row < board.length && col >= 0;
+            row++, col--
+        ) {
+            int val = board[row][col];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{row, col};
+                } else {
+                    // break out of loop because piece is in the way
+                    row = board.length;
+                }
+            }
+        }
+        // check up right
+        for (int row = endRow, col = endCol;
+            row >= 0 && col < board[row].length;
+            row--, col++
+        ) {
+            int val = board[row][col];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{row, col};
+                } else {
+                    // break out of loop because piece is in the way
+                    row = -1;
+                }
+            }
+        }
+        // check up left
+        for (int row = endRow, col = endCol;
+            row >= 0 && col >= 0;
+            row--, col--
+        ) {
+            int val = board[row][col];
+            if (val != 0) {
+                if (val == team * piece) {
+                    return new int[]{row, col};
+                } else {
+                    // break out of loop because piece is in the way
+                    row = -1;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds the starting position for a knight
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board game board
+     * @param endRow ending row position
+     * @param endCol ending column position
+     * @param team 1 if white, -1 if black
+     * @return array of starting position as [startRow, startCol]
+     */
+    public static int[] knightStart(
+        int[][] board, int endRow, int endCol, int team
+    ) {
+        // create a variables for possible locations
+        int twoUp = endRow - 2;
+        int twoDown = endRow + 2;
+        int oneUp = endRow - 1;
+        int oneDown = endRow - 1;
+        int twoRight = endCol + 2;
+        int twoLeft = endCol - 2;
+        int oneRight = endCol + 1;
+        int oneLeft = endCol - 1;
+
+        // go through all possible positions for knights
+        // have to keep checking if the indexes are in bounds
+        // because we can't use try/except
+        // don't use else if because it will not properly check all of them
+        if (twoUp >= 0 && oneRight < board[twoUp].length) {
+            if (board[twoUp][oneRight] == team * KNIGHT) {
+                return new int[]{twoUp, oneRight};
+            }
+        }
+        if (twoUp >= 0 && oneLeft >= 0) {
+            if (board[twoUp][oneLeft] == team * KNIGHT) {
+                return new int[]{twoUp, oneLeft};
+            }
+        }
+        if (twoDown >= 0 && oneRight < board[twoDown].length) {
+            if (board[twoDown][oneRight] == team * KNIGHT) {
+                return new int[]{twoDown, oneRight};
+            }
+        }
+        if (twoDown >= 0 && oneLeft >= 0) {
+            if (board[twoDown][oneLeft] == team * KNIGHT) {
+                return new int[]{twoDown, oneLeft};
+            }
+        }
+        if (oneUp >= 0 && twoRight < board[oneUp].length) {
+            if (board[oneUp][twoRight] == team * KNIGHT) {
+                return new int[]{oneUp, twoRight};
+            }
+        }
+        if (oneUp >= 0 && twoLeft >= 0) {
+            if (board[oneUp][twoLeft] == team * KNIGHT) {
+                return new int[]{oneUp, twoLeft};
+            }
+        }
+        if (oneDown >= 0 && twoRight < board[oneDown].length) {
+            if (board[oneDown][twoRight] == team * KNIGHT) {
+                return new int[]{oneDown, twoRight};
+            }
+        }
+        if (oneDown >= 0 && twoLeft >= 0) {
+            if (board[oneDown][twoLeft] == team * KNIGHT) {
+                return new int[]{oneDown, twoLeft};
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds the starting position for a queen
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board game board
+     * @param endRow ending row position
+     * @param endCol ending column position
+     * @param team 1 if white, -1 if black
+     * @return array of starting position as [startRow, startCol]
+     */
+    public static int[] queenStart(
+        int[][] board, int endRow, int endCol, int team
+    ) {
+        int[] rook = rookStart(board, endRow, endCol, false, team);
+        return (rook == null)
+            ? bishopStart(board, endRow, endCol, false, team) : rook;
+    }
+
+    /**
+     * Finds the starting position for a king
+     *
+     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param board game board
+     * @param endRow ending row position
+     * @param endCol ending column position
+     * @param team 1 if white, -1 if black
+     * @return array of starting position as [startRow, startCol]
+     */
+    public static int[] kingStart(
+        int[][] board, int endRow, int endCol, int team
+    ) {
+        // set variables for king position
+        int up = endRow - 1;
+        int down = endRow + 1;
+        int left = endCol - 1;
+        int right = endCol + 1;
+
+        // check all possible king locations
+        // lots of if statements to make sure
+        // we don't get an index out of bounds error
+        // don't use else if because it will not properly check all of them
+        if (up >= 0) {
+            if (board[up][endCol] == team * KING) {
+                return new int[]{up, endCol};
+            }
+            if (left >= 0) {
+                if (board[up][left] == team * KING) {
+                    return new int[]{up, left};
+                }
+            }
+            if (right < board[up].length) {
+                if (board[up][right] == team * KING) {
+                    return new int[]{up, right};
+                }
+            }
+        }
+        if (down < board.length) {
+            if (board[down][endCol] == team * KING) {
+                return new int[]{down, endCol};
+            }
+            if (left >= 0) {
+                if (board[down][left] == team * KING) {
+                    return new int[]{down, left};
+                }
+            }
+            if (right < board[down].length) {
+                if (board[down][right] == team * KING) {
+                    return new int[]{down, right};
+                }
+            }
+        }
+        if (left >= 0) {
+            if (board[endRow][left] == team * KING) {
+                return new int[]{endRow, left};
+            }
+        }
+        if (right >= 0) {
+            if (board[endRow][right] == team * KING) {
+                return new int[]{endRow, right};
+            }
+        }
+        return null;
+    }
+
+    /**
      * Finds the position of a peice that should move based on given ending
      *
      * @author Zach Panzarino <zachary@panzarino.com>
@@ -199,282 +549,29 @@ public class PgnReader {
         // determine what team the piece is from to check for
         int team = (turn) ? 1 : -1;
 
-        // using if because if condition is satisfied it will return
-        // so it is not more efficient to use if else
-        // also if else will not allow queen to check for both
-        // rook and bishop properties
-
-        // go through pawns first
+        // chose correct method based on piece type
+        // no need for else if because return statements
         if (stringPiece == null) {
-
-            // first check if it is just one up/down
-            int pawnRow = endRow + team;
-            // make sure the index is actually in bounds
-            if (pawnRow < board.length && pawnRow > 0) {
-                if (board[pawnRow][endCol] == team * PAWN) {
-                    return new int[]{pawnRow, endCol};
-                }
-            }
-            // then check if it is two up/down from starting position
-            pawnRow += team;
-            if (pawnRow < board.length && pawnRow > 0) {
-                if (board[pawnRow][endCol] == team * PAWN) {
-                    // set starting row for pawns
-                    int startRow = (turn) ? 6 : 1;
-                    if (pawnRow == startRow) {
-                        return new int[]{startRow, endCol};
-                    }
-                }
-            }
-            // check if there was a pawn capture
-            if (stringPawn != null) {
-                int pawnCol = colFromLetter(stringPawn);
-                int pawnRow1 = endRow + team;
-                if (pawnRow1 < board.length && pawnRow1 > 0) {
-                    return new int[]{pawnRow1, pawnCol};
-                }
-            }
+            return pawnStart(board, endRow, endCol, stringPawn, team);
         }
-
-        // go through the rooks (and queens)
-        if (stringPiece.equals("R") || stringPiece.equals("Q")) {
-
-            // make sure we are looking for the right piece
-            int piece = (stringPiece.equals("R")) ? ROOK : QUEEN;
-
-            // check for up moves
-            for (int i = endRow; i >= 0; i--) {
-                int val = board[i][endCol];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{i, endCol};
-                    } else {
-                        // break out of loop because piece is in the way
-                        i = -1;
-                    }
-                }
-            }
-            // check for down moves
-            for (int i = endRow; i < board.length; i++) {
-                int val = board[i][endCol];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{i, endCol};
-                    } else {
-                        // break out of loop because piece is in the way
-                        i = board.length;
-                    }
-                }
-            }
-            // check for left moves
-            for (int i = endCol; i >= 0; i--) {
-                int val = board[i][endCol];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{endRow, i};
-                    } else {
-                        // break out of loop because piece is in the way
-                        i = -1;
-                    }
-                }
-            }
-            // check for right moves
-            for (int i = endCol; i < board[endRow].length; i++) {
-                int val = board[i][endCol];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{endRow, i};
-                    } else {
-                        // break out of loop because piece is in the way
-                        i = board.length;
-                    }
-                }
-            }
+        if (stringPiece.equals("R")) {
+            return rookStart(board, endRow, endCol, true, team);
         }
-
-        // go through the bishops (and queens)
-        if (stringPiece.equals("B") || stringPiece.equals("Q")) {
-
-            // make sure we are looking for the right piece
-            int piece = (stringPiece.equals("B")) ? BISHOP : QUEEN;
-
-            // check down right
-            for (int row = endRow, col = endCol;
-                row < board.length && col < board[row].length;
-                row++, col++
-            ) {
-                int val = board[row][col];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{row, col};
-                    } else {
-                        // break out of loop because piece is in the way
-                        row = board.length;
-                    }
-                }
-            }
-            // check down left
-            for (int row = endRow, col = endCol;
-                row < board.length && col >= 0;
-                row++, col--
-            ) {
-                int val = board[row][col];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{row, col};
-                    } else {
-                        // break out of loop because piece is in the way
-                        row = board.length;
-                    }
-                }
-            }
-            // check up right
-            for (int row = endRow, col = endCol;
-                row >= 0 && col < board[row].length;
-                row--, col++
-            ) {
-                int val = board[row][col];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{row, col};
-                    } else {
-                        // break out of loop because piece is in the way
-                        row = -1;
-                    }
-                }
-            }
-            // check up left
-            for (int row = endRow, col = endCol;
-                row >= 0 && col >= 0;
-                row--, col--
-            ) {
-                int val = board[row][col];
-                if (val != 0) {
-                    if (val == team * piece) {
-                        return new int[]{row, col};
-                    } else {
-                        // break out of loop because piece is in the way
-                        row = -1;
-                    }
-                }
-            }
+        if (stringPiece.equals("B")) {
+            return bishopStart(board, endRow, endCol, true, team);
         }
-
-        // go through the knights
         if (stringPiece.equals("N")) {
-
-            // create a variables for possible locations
-            int twoUp = endRow - 2;
-            int twoDown = endRow + 2;
-            int oneUp = endRow - 1;
-            int oneDown = endRow - 1;
-            int twoRight = endCol + 2;
-            int twoLeft = endCol - 2;
-            int oneRight = endCol + 1;
-            int oneLeft = endCol - 1;
-
-            // go through all possible positions for knights
-            // have to keep checking if the indexes are in bounds
-            // because we can't use try/except
-            // don't use else if because it will not properly check all of them
-            if (twoUp >= 0 && oneRight < board[twoUp].length) {
-                if (board[twoUp][oneRight] == team * KNIGHT) {
-                    return new int[]{twoUp, oneRight};
-                }
-            }
-            if (twoUp >= 0 && oneLeft >= 0) {
-                if (board[twoUp][oneLeft] == team * KNIGHT) {
-                    return new int[]{twoUp, oneLeft};
-                }
-            }
-            if (twoDown >= 0 && oneRight < board[twoDown].length) {
-                if (board[twoDown][oneRight] == team * KNIGHT) {
-                    return new int[]{twoDown, oneRight};
-                }
-            }
-            if (twoDown >= 0 && oneLeft >= 0) {
-                if (board[twoDown][oneLeft] == team * KNIGHT) {
-                    return new int[]{twoDown, oneLeft};
-                }
-            }
-            if (oneUp >= 0 && twoRight < board[oneUp].length) {
-                if (board[oneUp][twoRight] == team * KNIGHT) {
-                    return new int[]{oneUp, twoRight};
-                }
-            }
-            if (oneUp >= 0 && twoLeft >= 0) {
-                if (board[oneUp][twoLeft] == team * KNIGHT) {
-                    return new int[]{oneUp, twoLeft};
-                }
-            }
-            if (oneDown >= 0 && twoRight < board[oneDown].length) {
-                if (board[oneDown][twoRight] == team * KNIGHT) {
-                    return new int[]{oneDown, twoRight};
-                }
-            }
-            if (oneDown >= 0 && twoLeft >= 0) {
-                if (board[oneDown][twoLeft] == team * KNIGHT) {
-                    return new int[]{oneDown, twoLeft};
-                }
-            }
+            return knightStart(board, endRow, endCol, team);
         }
-
+        if (stringPiece.equals("Q")) {
+            return queenStart(board, endRow, endCol, team);
+        }
         if (stringPiece.equals("K")) {
-
-            // set variables for king position
-            int up = endRow - 1;
-            int down = endRow + 1;
-            int left = endCol - 1;
-            int right = endCol + 1;
-
-            // check all possible king locations
-            // lots of if statements to make sure
-            // we don't get an index out of bounds error
-            // don't use else if because it will not properly check all of them
-            if (up >= 0) {
-                if (board[up][endCol] == team * KING) {
-                    return new int[]{up, endCol};
-                }
-                if (left >= 0) {
-                    if (board[up][left] == team * KING) {
-                        return new int[]{up, left};
-                    }
-                }
-                if (right < board[up].length) {
-                    if (board[up][right] == team * KING) {
-                        return new int[]{up, right};
-                    }
-                }
-            }
-            if (down < board.length) {
-                if (board[down][endCol] == team * KING) {
-                    return new int[]{down, endCol};
-                }
-                if (left >= 0) {
-                    if (board[down][left] == team * KING) {
-                        return new int[]{down, left};
-                    }
-                }
-                if (right < board[down].length) {
-                    if (board[down][right] == team * KING) {
-                        return new int[]{down, right};
-                    }
-                }
-            }
-            if (left >= 0) {
-                if (board[endRow][left] == team * KING) {
-                    return new int[]{endRow, left};
-                }
-            }
-            if (right >= 0) {
-                if (board[endRow][right] == team * KING) {
-                    return new int[]{endRow, right};
-                }
-            }
+            return kingStart(board, endRow, endCol, team);
         }
 
         // default return so the compiler doesn't throw an error
-        return new int[]{0, 0};
+        return null;
     }
 
     /**
@@ -638,19 +735,19 @@ public class PgnReader {
             // and they require two moves, where all others require one
             if (move.equals("O-O")) {
                 if (turn) {
-                    board = executeMove(board, new int[]{7, 4, 7, 6});
-                    board = executeMove(board, new int[]{7, 7, 7, 5});
+                    board = executeMove(board, new int[]{7, 6, 7, 4});
+                    board = executeMove(board, new int[]{7, 5, 7, 7});
                 } else {
-                    board = executeMove(board, new int[]{0, 4, 0, 6});
-                    board = executeMove(board, new int[]{0, 7, 0, 5});
+                    board = executeMove(board, new int[]{0, 6, 0, 4});
+                    board = executeMove(board, new int[]{0, 5, 0, 7});
                 }
             } else if (move.equals("O-O-O")) {
                 if (turn) {
-                    board = executeMove(board, new int[]{7, 4, 7, 2});
-                    board = executeMove(board, new int[]{7, 0, 7, 3});
+                    board = executeMove(board, new int[]{7, 2, 7, 4});
+                    board = executeMove(board, new int[]{7, 3, 7, 0});
                 } else {
-                    board = executeMove(board, new int[]{0, 4, 0, 2});
-                    board = executeMove(board, new int[]{0, 0, 0, 3});
+                    board = executeMove(board, new int[]{0, 2, 0, 4});
+                    board = executeMove(board, new int[]{0, 3, 0, 0});
                 }
             } else {
                 // get move and execute it
