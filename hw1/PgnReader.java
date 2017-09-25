@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  *
  * @see http://cs1331.gatech.edu/fall2017/hw1/hw1-pgn-reader.html
  *
- * @author Zach Panzarino <zachary@panzarino.com>
+ * @author Zach Panzarino (zpanzarino3) <zachary@panzarino.com>
  */
 public class PgnReader {
 
@@ -31,7 +31,6 @@ public class PgnReader {
      *
      * @see http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param tagName name of the tag whose value you want
      * @param game PGN text of a chess game
      * @return value in the named tag pair
@@ -49,7 +48,7 @@ public class PgnReader {
     /**
      * Print out the board for testing
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param array 2-d array to be printed
      */
     private static void print2DArray(int[][] array) {
         for (int[] row : array) {
@@ -64,7 +63,7 @@ public class PgnReader {
     /**
      * Print out a 1 dimensional array of Strings for testing
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param array array to be printed
      */
     private static void print1DArray(String[] array) {
         for (String i : array) {
@@ -75,7 +74,7 @@ public class PgnReader {
     /**
      * Print out a 1 dimensional array of ints for testing
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+     * @param array array to be printed
      */
     private static void print1DArray(int[] array) {
         for (int i : array) {
@@ -86,7 +85,6 @@ public class PgnReader {
     /**
      * Converts a row letter to the corresponding int
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param letter letter of row
      * @return number of row
      */
@@ -98,7 +96,6 @@ public class PgnReader {
     /**
      * Populate the board with starting positions for pieces
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @return starting board
      */
     public static int[][] populate() {
@@ -139,7 +136,6 @@ public class PgnReader {
     /**
      * Splits apart moves from game String
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param game String of game input
      * @return list of separated moves
      */
@@ -175,7 +171,6 @@ public class PgnReader {
     /**
      * Finds the starting position for a pawn
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param board game board
      * @param endRow ending row position
      * @param endCol ending column position
@@ -186,6 +181,17 @@ public class PgnReader {
     public static int[] pawnStart(
         int[][] board, int endRow, int endCol, String stringPawn, int team
     ) {
+        // check if there was a pawn capture
+        if (stringPawn != null) {
+            int pawnCol = colFromLetter(stringPawn);
+            int pawnRow1 = endRow + team;
+            if (pawnRow1 < board.length && pawnRow1 > 0) {
+                return new int[]{pawnRow1, pawnCol};
+            }
+        }
+
+        // check for normal moves without capture
+
         // first check if it is just one up/down
         int pawnRow = endRow + team;
         // make sure the index is actually in bounds
@@ -205,14 +211,6 @@ public class PgnReader {
                 }
             }
         }
-        // check if there was a pawn capture
-        if (stringPawn != null) {
-            int pawnCol = colFromLetter(stringPawn);
-            int pawnRow1 = endRow + team;
-            if (pawnRow1 < board.length && pawnRow1 > 0) {
-                return new int[]{pawnRow1, pawnCol};
-            }
-        }
 
         return null;
     }
@@ -220,7 +218,6 @@ public class PgnReader {
     /**
      * Finds the starting position for a rook
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param board game board
      * @param endRow ending row position
      * @param endCol ending column position
@@ -235,7 +232,7 @@ public class PgnReader {
         int piece = (whichPiece) ? ROOK : QUEEN;
 
         // check for up moves
-        for (int i = endRow; i >= 0; i--) {
+        for (int i = endRow - 1; i >= 0; i--) {
             int val = board[i][endCol];
             if (val != 0) {
                 if (val == team * piece) {
@@ -247,7 +244,7 @@ public class PgnReader {
             }
         }
         // check for down moves
-        for (int i = endRow; i < board.length; i++) {
+        for (int i = endRow + 1; i < board.length; i++) {
             int val = board[i][endCol];
             if (val != 0) {
                 if (val == team * piece) {
@@ -259,8 +256,8 @@ public class PgnReader {
             }
         }
         // check for left moves
-        for (int i = endCol; i >= 0; i--) {
-            int val = board[i][endCol];
+        for (int i = endCol - 1; i >= 0; i--) {
+            int val = board[endRow][i];
             if (val != 0) {
                 if (val == team * piece) {
                     return new int[]{endRow, i};
@@ -271,8 +268,8 @@ public class PgnReader {
             }
         }
         // check for right moves
-        for (int i = endCol; i < board[endRow].length; i++) {
-            int val = board[i][endCol];
+        for (int i = endCol + 1; i < board[endRow].length; i++) {
+            int val = board[endRow][i];
             if (val != 0) {
                 if (val == team * piece) {
                     return new int[]{endRow, i};
@@ -289,7 +286,6 @@ public class PgnReader {
     /**
      * Finds the starting position for a bishop
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param board game board
      * @param endRow ending row position
      * @param endCol ending column position
@@ -304,7 +300,7 @@ public class PgnReader {
         int piece = (whichPiece) ? BISHOP : QUEEN;
 
         // check down right
-        for (int row = endRow, col = endCol;
+        for (int row = endRow + 1, col = endCol + 1;
             row < board.length && col < board[row].length;
             row++, col++
         ) {
@@ -319,7 +315,7 @@ public class PgnReader {
             }
         }
         // check down left
-        for (int row = endRow, col = endCol;
+        for (int row = endRow + 1, col = endCol - 1;
             row < board.length && col >= 0;
             row++, col--
         ) {
@@ -334,7 +330,7 @@ public class PgnReader {
             }
         }
         // check up right
-        for (int row = endRow, col = endCol;
+        for (int row = endRow - 1, col = endCol + 1;
             row >= 0 && col < board[row].length;
             row--, col++
         ) {
@@ -349,7 +345,7 @@ public class PgnReader {
             }
         }
         // check up left
-        for (int row = endRow, col = endCol;
+        for (int row = endRow - 1, col = endCol - 1;
             row >= 0 && col >= 0;
             row--, col--
         ) {
@@ -370,7 +366,6 @@ public class PgnReader {
     /**
      * Finds the starting position for a knight
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param board game board
      * @param endRow ending row position
      * @param endCol ending column position
@@ -384,7 +379,7 @@ public class PgnReader {
         int twoUp = endRow - 2;
         int twoDown = endRow + 2;
         int oneUp = endRow - 1;
-        int oneDown = endRow - 1;
+        int oneDown = endRow + 1;
         int twoRight = endCol + 2;
         int twoLeft = endCol - 2;
         int oneRight = endCol + 1;
@@ -441,7 +436,6 @@ public class PgnReader {
     /**
      * Finds the starting position for a queen
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param board game board
      * @param endRow ending row position
      * @param endCol ending column position
@@ -459,7 +453,6 @@ public class PgnReader {
     /**
      * Finds the starting position for a king
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param board game board
      * @param endRow ending row position
      * @param endCol ending column position
@@ -525,7 +518,6 @@ public class PgnReader {
     /**
      * Finds the position of a peice that should move based on given ending
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
      * @param board board to find move in
      * @param endRow ending row position
      * @param endCol ending column position
@@ -585,7 +577,7 @@ public class PgnReader {
      * colTo
      * ]
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+
      * @param board board for move to be found on
      * @param move string of the move
      * @param turn true if white turn, false if black turn
@@ -641,7 +633,7 @@ public class PgnReader {
      *
      * Instructions are expected to come from parseMove method
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+
      * @param board board for moves to be made on
      * @param moves moves to be made
      * @return updated board
@@ -662,7 +654,7 @@ public class PgnReader {
     /**
      * Converts a piece number into the respective character
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+
      * @param number number of piece
      * @return character of piece
      */
@@ -675,7 +667,7 @@ public class PgnReader {
     /**
      * Converts a board to FEN Notation
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+
      * @param board board of the game
      * @return FEN representation of given board
      */
@@ -716,7 +708,7 @@ public class PgnReader {
      *
      * @see http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm#c16.1
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+
      * @param game PGN-formatted chess game or opening
      * @return game final position in FEN
      */
@@ -764,7 +756,7 @@ public class PgnReader {
     /**
      * Reads the file named by path and returns its content as a String.
      *
-     * @author Zach Panzarino <zachary@panzarino.com>
+
      * @param path relative or abolute path of the file to read
      * @return content of the file
      */
