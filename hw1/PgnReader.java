@@ -94,6 +94,17 @@ public class PgnReader {
     }
 
     /**
+     * Converts a peice letter to the corresponding int
+     *
+     * @param letter letter of piece
+     * @return number of piece
+     */
+    public static int pieceFromLetter(String letter) {
+        String letters = " PRNBQK";
+        return letters.indexOf(letter);
+    }
+
+    /**
      * Populate the board with starting positions for pieces
      *
      * @return starting board
@@ -175,17 +186,30 @@ public class PgnReader {
      * @param endRow ending row position
      * @param endCol ending column position
      * @param stringPawn row of pawn as string if capture
+     * @param pawnPromo string if there is a pawn promotion
      * @param team 1 if white, -1 if black
      * @return array of starting position as [startRow, startCol]
      */
     public static int[] pawnStart(
-        int[][] board, int endRow, int endCol, String stringPawn, int team
+        int[][] board, int endRow, int endCol,
+        String stringPawn, String pawnPromo, int team
     ) {
         // check if there was a pawn capture
         if (stringPawn != null) {
             int pawnCol = colFromLetter(stringPawn);
             int pawnRow1 = endRow + team;
             if (pawnRow1 < board.length && pawnRow1 > 0) {
+                // check for en passant
+                int ep = (team == 1) ? 3 : 4;
+                if (board[pawnRow1][endCol] == -team * PAWN
+                    && pawnRow1 == ep) {
+                    board[pawnRow1][endCol] = 0;
+                }
+                // check for pawn promotion
+                if (pawnPromo != null) {
+                    pawnPromo = pawnPromo.substring(1);
+                    board[pawnRow1][pawnCol] = pieceFromLetter(pawnPromo);
+                }
                 return new int[]{pawnRow1, pawnCol};
             }
         }
@@ -197,6 +221,11 @@ public class PgnReader {
         // make sure the index is actually in bounds
         if (pawnRow < board.length && pawnRow > 0) {
             if (board[pawnRow][endCol] == team * PAWN) {
+                // check for pawn promotion
+                if (pawnPromo != null) {
+                    pawnPromo = pawnPromo.substring(1);
+                    board[pawnRow][endCol] = pieceFromLetter(pawnPromo);
+                }
                 return new int[]{pawnRow, endCol};
             }
         }
@@ -207,6 +236,11 @@ public class PgnReader {
                 // set starting row for pawns
                 int startRow = (team == 1) ? 6 : 1;
                 if (pawnRow == startRow) {
+                    // check for pawn promotion
+                    if (pawnPromo != null) {
+                        pawnPromo = pawnPromo.substring(1);
+                        board[startRow][endCol] = pieceFromLetter(pawnPromo);
+                    }
                     return new int[]{startRow, endCol};
                 }
             }
@@ -523,6 +557,7 @@ public class PgnReader {
      * @param endCol ending column position
      * @param stringPiece piece if one is specified
      * @param stringPawn row of pawn as letter if one is specified
+     * @param pawnPromo piece to change if there is a pawn promo
      * @param turn true if white turn, false if black turn
      * @return array of starting position as [startRow, startCol]
      */
@@ -530,7 +565,7 @@ public class PgnReader {
         // had to break apart params because longer than 80 chars
         int[][] board,
         int endRow, int endCol,
-        String stringPiece, String stringPawn,
+        String stringPiece, String stringPawn, String pawnPromo,
         boolean turn
     ) {
         // lots of if statements with .length because
@@ -544,7 +579,9 @@ public class PgnReader {
         // chose correct method based on piece type
         // no need for else if because return statements
         if (stringPiece == null) {
-            return pawnStart(board, endRow, endCol, stringPawn, team);
+            return pawnStart(
+                board, endRow, endCol, stringPawn, pawnPromo, team
+            );
         }
         if (stringPiece.equals("R")) {
             return rookStart(board, endRow, endCol, true, team);
@@ -594,7 +631,8 @@ public class PgnReader {
             // check if a pawn is specified
             // require that there is no number immediately afterwards
             // to distinguish between pawn and position
-            + "([a-h](?!\\d))?"
+            // also require no . behind to avoid capturing 'e.p.'
+            + "([a-h](?!\\d)(?![.]))?"
             // check if there is a capture
             // not needed but gets it out of the way
             + "(x)?"
@@ -603,6 +641,8 @@ public class PgnReader {
             + "([a-h](?=\\d))"
             // find the ending column
             + "(\\d)"
+            // check if there is a pawn promotion
+            + "(=[RNBQK])?"
         );
         // use the regex to parse and break apart the string
         Matcher regexMatcher = regexPattern.matcher(move);
@@ -614,6 +654,7 @@ public class PgnReader {
         String stringCapture = regexMatcher.group(3);
         String stringColumn = regexMatcher.group(4);
         String stringRow = regexMatcher.group(5);
+        String pawnPromo = regexMatcher.group(6);
 
         // set the ending position in ints
         int finalRow = board.length - Integer.parseInt(stringRow);
@@ -621,7 +662,7 @@ public class PgnReader {
 
         // get the starting coordinates
         int[] startingPos = findStart(
-            board, finalRow, finalCol, stringPiece, stringPawn, turn
+            board, finalRow, finalCol, stringPiece, stringPawn, pawnPromo, turn
         );
 
         // return the coordinates
