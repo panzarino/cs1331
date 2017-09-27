@@ -46,4 +46,8 @@ public class Book {
     public int getPages() {
         return numPages;
     }
+
+    public boolean equals(Book other) {
+        return title.equals(other.title) && author.equals(other.author);
+    }
 }

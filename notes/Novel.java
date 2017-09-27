@@ -1,9 +1,12 @@
 public class Novel extends Book {
     private String genre;
+    public static final String[] VALID_GENRES = new String[]{
+        "Horror", "SciFi", "Romance", "Nonfiction"
+    };
 
     public Novel(String title, String author, int pages, String genre) {
         super(title, author, pages);
-        this.genre = genre;
+        setGenre(genre);
     }
 
     public String toString() {
@@ -15,7 +18,20 @@ public class Novel extends Book {
     }
 
     public void setGenre(String genre) {
-        this.genre = genre;
+        if (contains(VALID_GENRES, genre)) {
+            this.genre = genre;
+        } else {
+            this.genre = "Unknown";
+        }
+    }
+
+    private boolean contains(String[] genres, String g) {
+        for (String s : genres) {
+            if (s.equals(g)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String showIntials() {
