@@ -46,43 +46,6 @@ public class PgnReader {
     }
 
     /**
-     * Print out the board for testing
-     *
-     * @param array 2-d array to be printed
-     */
-    private static void print2DArray(int[][] array) {
-        for (int[] row : array) {
-            for (int col : row) {
-                String s = (col < 0) ? ", " : ",  ";
-                System.out.print(col + s);
-            }
-            System.out.println();
-        }
-    }
-
-    /**
-     * Print out a 1 dimensional array of Strings for testing
-     *
-     * @param array array to be printed
-     */
-    private static void print1DArray(String[] array) {
-        for (String i : array) {
-            System.out.println(i);
-        }
-    }
-
-    /**
-     * Print out a 1 dimensional array of ints for testing
-     *
-     * @param array array to be printed
-     */
-    private static void print1DArray(int[] array) {
-        for (int i : array) {
-            System.out.println(i);
-        }
-    }
-
-    /**
      * Converts a row letter to the corresponding int
      *
      * @param letter letter of row
