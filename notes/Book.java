@@ -1,4 +1,4 @@
-public class Book {
+public class Book implements Legible, Comparable {
     private String title;
     private String author;
     private int numPages;
@@ -49,5 +49,13 @@ public class Book {
 
     public boolean equals(Book other) {
         return title.equals(other.title) && author.equals(other.author);
+    }
+
+    public int compareTo(Object other) {
+        if (other instanceof Book) {
+            return this.numPages - ((Book) other).numPages;
+        } else {
+            return -1;
+        }
     }
 }

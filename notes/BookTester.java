@@ -17,5 +17,7 @@ public class BookTester {
 
         System.out.println(book1.showIntials());
         System.out.println(book2.showIntials());
+
+        System.out.println(book1.compareTo(book2));
     }
 }
