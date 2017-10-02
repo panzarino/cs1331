@@ -1,4 +1,4 @@
-public class Book implements Legible, Comparable {
+public abstract class Book implements Legible, Comparable {
     private String title;
     private String author;
     private int numPages;

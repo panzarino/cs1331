@@ -9,6 +9,11 @@ public class Novel extends Book {
         setGenre(genre);
     }
 
+    public Novel() {
+        super();
+        setGenre("Unknown");
+    }
+
     public String toString() {
         return super.toString() + ", Genre: " + genre;
     }
