@@ -1,44 +1,29 @@
-public class Animal {
+public abstract class Animal {
     private String name;
+    private int age;
     private String sound;
-    private String species;
-    private int lifeSpan;
 
-    public Animal(String name, String sound, String species, int lifeSpan) {
+    public Animal(String name, int age, String sound) {
         this.name = name;
+        this.age = age;
         this.sound = sound;
-        this.species = species;
-        this.lifeSpan = lifeSpan;
-    }
-
-    public Animal(String name, String sound, int lifeSpan) {
-        this(name, sound, "Default Species", lifeSpan);
     }
 
     public String getName() {
         return name;
     }
 
-    public int getLifeSpan() {
-        return lifeSpan;
+    public int getAge() {
+        return age;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getSound() {
+        return sound;
     }
 
     public String toString() {
-        return "My " + species + " " + name + " says " + sound;
+        return name + " that is " + age + " years old makes the sound " + sound;
     }
 
-    public static void main(String[] args) {
-        Animal dog = new Animal("Fido", "Woof", "Labrador", 10);
-        Animal rhino = new Animal("Will", "Roar", 40);
-        System.out.println(dog.getName());
-        System.out.println(rhino.getLifeSpan());
-        dog.setName("George");
-        System.out.println(dog.getName());
-        System.out.println(dog);
-        System.out.println(rhino);
-    }
+    public abstract String makeNoise();
 }
