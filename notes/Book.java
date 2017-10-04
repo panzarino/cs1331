@@ -47,8 +47,12 @@ public abstract class Book implements Legible, Comparable {
         return numPages;
     }
 
-    public boolean equals(Book other) {
-        return title.equals(other.title) && author.equals(other.author);
+    public boolean equals(Object other) {
+        if (other == null) { return false; }
+        if (other == this) { return true; }
+        if (!(other instanceof Book)) { return false; }
+        Book that = (Book) other;
+        return title.equals(that.title) && author.equals(that.author);
     }
 
     public int compareTo(Object other) {

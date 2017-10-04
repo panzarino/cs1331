@@ -1,7 +1,7 @@
 public class BookTester {
     public static void main(String[] args) {
-        Book book1 = new Novel("1984", "Orwell", 274, "SciFic");
-        Book book2 = new Novel("It", "King", 429, "Horror");
+        Book book1 = new Novel("1984", "Orwell", 274, Genre.SCIFI);
+        Book book2 = new Novel("It", "King", 429, Genre.HORROR);
         Book book3 = new Textbook();
         Book book4 = new Textbook();
         Book book5 = new Novel();
