@@ -1,10 +1,6 @@
 public class Square {
-    private char file, rank;
-
-    public static int colFromLetter(char letter) {
-        String letters = "abcdefgh";
-        return letters.indexOf(letter);
-    }
+    private char file;
+    private char rank;
 
     Square(char file, char rank) {
         this.file = file;
@@ -13,6 +9,14 @@ public class Square {
 
     Square(String name) {
         this(name.charAt(0), name.charAt(1));
+    }
+
+    public char getFile() {
+        return file;
+    }
+
+    public char getRank() {
+        return rank;
     }
 
     public String toString() {
