@@ -1,4 +1,4 @@
-public abstract class Book implements Legible, Comparable {
+public class Book implements Legible, Comparable {
     private String title;
     private String author;
     private int numPages;
@@ -45,14 +45,6 @@ public abstract class Book implements Legible, Comparable {
 
     public int getPages() {
         return numPages;
-    }
-
-    public boolean equals(Object other) {
-        if (other == null) { return false; }
-        if (other == this) { return true; }
-        if (!(other instanceof Book)) { return false; }
-        Book that = (Book) other;
-        return title.equals(that.title) && author.equals(that.author);
     }
 
     public int compareTo(Object other) {

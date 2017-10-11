@@ -22,4 +22,12 @@ public class Novel extends Book {
     public void setGenre(Genre genre) {
         this.genre = genre;
     }
+
+    public boolean equals(Object other) {
+        if (other == null) { return false; }
+        if (other == this) { return true; }
+        if (!(other instanceof Novel)) { return false; }
+        Novel that = (Novel) other;
+        return getTitle().equals(that.getTitle()) && getAuthor().equals(that.getAuthor());
+    }
 }
