@@ -45,9 +45,9 @@ public class Pawn extends Piece {
                 Square two = new Square(
                     square.getFile(), (char) (square.getRank() + 2)
                 );
-                return new Square[]{one, two};
+                return cleanArray(new Square[]{one, two}, square);
             }
-            return new Square[]{one};
+            return cleanArray(new Square[]{one}, square);
         } else {
             Square one = new Square(
                 square.getFile(), (char) (square.getRank() - 1)
@@ -56,9 +56,9 @@ public class Pawn extends Piece {
                 Square two = new Square(
                     square.getFile(), (char) (square.getRank() - 2)
                 );
-                return new Square[]{one, two};
+                return cleanArray(new Square[]{one, two}, square);
             }
-            return new Square[]{one};
+            return cleanArray(new Square[]{one}, square);
         }
     }
 }
