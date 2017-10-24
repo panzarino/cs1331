@@ -12,10 +12,9 @@ public class InvalidSquareException extends RuntimeException {
      * does not exist in an array, the client should not be able to access a
      * square that is not on the board. Since ArrayIndexOutOfBoundsException is
      * unchecked, it makes sense that this exception should also be unchecked.
-     * @param file file that causes the exception
-     * @param rank rank that causes the exception
+     * @param name name of file that causes the exception
      */
-    public InvalidSquareException(char file, char rank) {
-        super("Square " + file + rank + " is not a valid square.");
+    public InvalidSquareException(String name) {
+        super("Square " + name + " is not a valid square.");
     }
 }

@@ -20,13 +20,14 @@ public class Square {
      * @param name string representation of rank and file
      */
     Square(String name) {
-        char f = name.charAt(0);
-        char r = name.charAt(1);
-        if (f < 'a' || f > 'h' || r < '1' || r > '8' || name.length() > 2) {
-            throw new InvalidSquareException(f, r);
+        if (name.length() != 2
+            || name.charAt(0) < 'a' || name.charAt(0) > 'h'
+            || name.charAt(1) < '1' || name.charAt(1) > '8'
+            ) {
+            throw new InvalidSquareException(name);
         }
-        file = f;
-        rank = r;
+        file = name.charAt(0);
+        rank = name.charAt(1);
     }
 
     /**
