@@ -12,11 +12,7 @@ public class Square {
      * @param rank rank as a number represents row
      */
     Square(char file, char rank) {
-        if (file < 'a' || file > 'h' || rank < '1' || rank > '8') {
-            throw new InvalidSquareException(file, rank);
-        }
-        this.file = file;
-        this.rank = rank;
+        this("" + file + rank);
     }
 
     /**
@@ -24,7 +20,13 @@ public class Square {
      * @param name string representation of rank and file
      */
     Square(String name) {
-        this(name.charAt(0), name.charAt(1));
+        char f = name.charAt(0);
+        char r = name.charAt(1);
+        if (f < 'a' || f > 'h' || r < '1' || r > '8' || name.length() > 2) {
+            throw new InvalidSquareException(f, r);
+        }
+        file = f;
+        rank = r;
     }
 
     /**
