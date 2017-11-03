@@ -1,27 +1,37 @@
-import java.util.ArrayList;
-import java.util.Collection;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
 public class WordCount {
-    private ArrayList<String> words;
+    private Map<String, Integer> wordCounts;
     private int numwords;
 
-    public WordCount(String fileName) {
-        words = new ArrayList<String>(3);
-        words.add("Happy");
-        words.add("Halloween");
-        words.add("Candy");
-        numwords = 3;
+    public WordCount(String fileName) throws FileNotFoundException {
+        wordCounts = new HashMap<String, Integer>();
+        Scanner fileScanner = new Scanner(new File(fileName));
+        while (fileScanner.hasNext()) {
+            String word = fileScanner.next().toLowerCase().replaceAll("[^a-z]", "");
+            if (wordCounts.get(word) != null) {
+                wordCounts.put(word, wordCounts.get(word) + 1);
+            } else {
+                wordCounts.put(word, 1);
+            }
+            numwords++;
+        }
     }
 
-    public Collection<String> getWords() {
-        return words;
+    public Set<String> getWords() {
+        return wordCounts.keySet();
     }
 
     public int getCount(String word) {
-        return 1;
+        return wordCounts.get(word);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         String fileName = args[0];
         WordCount wc = new WordCount(fileName);
         for (String word : wc.getWords()) {
