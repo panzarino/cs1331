@@ -11,7 +11,7 @@ public class SquareSet implements Set<Square> {
     }
 
     public SquareSet(Collection<Square> input) {
-        super();
+        this();
         addAll(input);
     }
 
@@ -19,10 +19,13 @@ public class SquareSet implements Set<Square> {
         if (square == null) {
             throw new NullPointerException();
         }
-        for (Square s : data) {
-            if (s.equals(square)) {
-                return false;
-            }
+        if (contains(square)) {
+            return false;
+        }
+        char file = square.getFile();
+        char rank = square.getRank();
+        if (file < 'a' || file > 'h' || rank < '1' || rank > '8') {
+            throw new InvalidSquareException("" + file + rank);
         }
         Square[] newData = new Square[data.length + 1];
         System.arraycopy(data, 0, newData, 0, data.length);
@@ -32,6 +35,16 @@ public class SquareSet implements Set<Square> {
     }
 
     public boolean addAll(Collection<? extends Square> input) {
+        for (Square s : input) {
+            if (s == null) {
+                throw new NullPointerException();
+            }
+            char file = s.getFile();
+            char rank = s.getRank();
+            if (file < 'a' || file > 'h' || rank < '1' || rank > '8') {
+                throw new InvalidSquareException("" + file + rank);
+            }
+        }
         boolean ret = false;
         for (Square s : input) {
             if (add(s)) {
@@ -47,7 +60,7 @@ public class SquareSet implements Set<Square> {
 
     public boolean contains(Object o) {
         for (Square s : data) {
-            if (s.equals(o)) {
+            if (s != null && s.equals(o)) {
                 return true;
             }
         }
@@ -74,21 +87,21 @@ public class SquareSet implements Set<Square> {
             return false;
         }
         Set that = (Set) other;
-        for (Object s : this) {
-            if (!that.contains(s)) {
-                return false;
-            }
+        if (!containsAll(that)) {
+            return false;
         }
-        for (Object s : that) {
-            if (!contains(s)) {
-                return false;
-            }
+        if (!that.containsAll(this)) {
+            return false;
         }
         return true;
     }
 
     public int hashCode() {
-        return 0;
+        int output = 0;
+        for (Square s : data) {
+            output += s.hashCode();
+        }
+        return output;
     }
 
     public boolean isEmpty() {
@@ -110,12 +123,13 @@ public class SquareSet implements Set<Square> {
         }
         Square[] newArray = new Square[data.length - 1];
         int count = 0;
+        int newCount = 0;
         while (count < newArray.length) {
             Square s = data[count];
             if (s != null) {
-                newArray[count] = data[count];
-                count++;
+                newArray[newCount++] = data[count];
             }
+            count++;
         }
         data = newArray;
         return true;
@@ -155,10 +169,11 @@ public class SquareSet implements Set<Square> {
     }
 
     public class SquareIterator implements Iterator<Square> {
-        private int count = -1;
+        private int count;
         private Square[] elements;
 
         public SquareIterator(Square[] input) {
+            count = -1;
             elements = input;
         }
 

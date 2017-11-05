@@ -72,4 +72,12 @@ public class Square {
         Square that = (Square) other;
         return file == that.file && rank == that.rank;
     }
+
+    /**
+     * Returns a hashcode value for the square
+     * @return hashcode
+     */
+    public int hashCode() {
+        return toString().hashCode();
+    }
 }
