@@ -1,6 +1,7 @@
 /**
  * Represents a square on a chess board
  * @author zpanzarino3
+ * @version 1.0.0
  */
 public class Square {
     private char file;

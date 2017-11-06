@@ -1,6 +1,7 @@
 /**
  * Error for when creating an invalid square
  * @author zpanzarino3
+ * @version 1.0.0
  */
 public class InvalidSquareException extends RuntimeException {
     /**
